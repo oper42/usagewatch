@@ -6,7 +6,7 @@ require 'usagewatch/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "usagewatch"
-  spec.version       = Usagewatch::VERSION
+  spec.version       = "0.0.8"
   spec.authors       = ["Phil Chen, Ruben Espinosa"]
   spec.email         = ["nethacker@gmail.com"]
   spec.description   = %q{A Ruby Gem with methods to find usage statistics on a Linux server such as CPU, Disk, TCP/UDP Connections, Load, Bandwidth, Disk I/O, and Memory}
