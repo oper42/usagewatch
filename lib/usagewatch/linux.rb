@@ -103,7 +103,7 @@ module Usagewatch
   end
 
   # Show the percentage of Active Memory used
-  def self.uw_memused
+  def self.uw_memused(memtotal_place = nil, memactive_place = nil)
     if File.exists?("/proc/meminfo")
       File.open("/proc/meminfo", "r") do |file|
         @result = file.read
@@ -111,22 +111,28 @@ module Usagewatch
     end
 
     @memstat = @result.split("\n").collect{|x| x.strip}
-    @memtotal = @memstat[0].gsub(/[^0-9]/, "")
-    @memactive = @memstat[5].gsub(/[^0-9]/, "")
-    @memactivecalc = (@memactive.to_f * 100) / @memtotal.to_f
-    @memusagepercentage = @memactivecalc.round
-  end
+    if memtotal_place == nil or memactive_place == nil
+            @memstat.each_with_index do |stat, index|
+                if memtotal_place == nil
+                        if stat.include?("MemTotal")
+                                memtotal_place = index
+                        end
+                    end
+                    if memactive_place == nil
+                        if stat.include?("MemAvailable")
+                                memactive_place = index
+                        end
+                    end
 
-  # return hash of top ten proccesses by mem consumption
-  # example [["apache2", 12.0], ["passenger", 13.2]]
-  def self.uw_memtop
-    ps = `ps aux | awk '{print $11, $4}' | sort -k2nr  | head -n 10`
-    array = []
-    ps.each_line do |line|
-      line = line.chomp.split(" ")
-      array << [line.first.gsub(/[\[\]]/, ""), line.last]
+            end
+        end
+    if memtotal_place == nil or memactive_place == nil
+        raise "Unable to locate memory total and memory free entries. Please define with uw_memused(memtotal_place, memactive_place) to list actual line locations"
     end
-    array
+    @memtotal = @memstat[memtotal_place].gsub(/[^0-9]/, "")
+    @memactive = @memstat[memactive_place].gsub(/[^0-9]/, "")
+    @memactivecalc = ((@memtotal.to_f - @memactive.to_f) * 100) / @memtotal.to_f
+    @memusagepercentage = @memactivecalc.round
   end
 
   # Show the average system load of the past minute
